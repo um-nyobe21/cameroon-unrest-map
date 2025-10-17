@@ -25,7 +25,7 @@
       background: white;
       padding: 10px;
       border: 1px solid #333;
-      max-height: 50vh; /* Adjust for mobile screens */
+      max-height: 50vh;
       overflow-y: auto;
       font-size: 12px;
       position: relative;
@@ -55,44 +55,45 @@
       word-wrap: break-word;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 10px; /* Smaller text for mobile */
+      white-space: nowrap; /* Prevent wrapping for straight columns */
     }
     .table-control th {
       position: sticky;
       top: 0;
     }
     .table-wrapper {
-      max-height: 45vh; /* Adjust for header and padding */
+      max-height: 45vh;
       overflow-x: auto; /* Horizontal scroll for mobile */
       overflow-y: auto;
       -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+      min-width: 100%; /* Ensure full width for scrolling */
     }
 
     /* Media Queries for Mobile */
     @media (max-width: 768px) {
       #map {
-        height: 60vh; /* Reduced height for mobile */
+        height: 60vh;
       }
       .table-control {
         max-height: 60vh;
         width: 90vw;
         margin: 0 auto;
       }
-      .table-control table {
-        min-width: 600px; /* Ensure table is scrollable horizontally */
-      }
-      .table-control th, .table-control td {
-        font-size: 8px; /* Even smaller for cramped space */
-        white-space: nowrap; /* Prevent text wrapping */
-      }
-      .leaflet-tooltip {
-        font-size: 10px;
-        max-width: 100px;
-      }
-      .table-control button {
-        font-size: 12px;
-      }
+    .table-control table {
+      min-width: 800px; /* Wider min-width for better horizontal scroll */
     }
+    .table-control th, .table-control td {
+      font-size: 8px;
+      padding: 1px 2px; /* Tighter padding */
+    }
+    .leaflet-tooltip {
+      font-size: 10px;
+      max-width: 100px;
+    }
+    .table-control button {
+      font-size: 12px;
+    }
+  }
   </style>
 </head>
 <body>
@@ -104,9 +105,9 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    L.control.scale().addTo(map); // Add scale for mobile usability
+    L.control.scale().addTo(map); // Scale for mobile
 
-    // City data: [lat, lng, city, numEvents, severities, dates, maxSeverity]
+    // Updated city data with corrected Bamenda coordinates (5.96, 10.15)
     const cityData = [
       [9.30, 13.40, 'Garoua', 2, '2, 2', 'Oct 13, Oct 17', 2],
       [4.05, 9.70, 'Douala', 4, '1, 2, 4, 4', 'Oct 14, 15, 16, 17', 4],
@@ -114,11 +115,11 @@
       [5.40, 10.45, 'Dschang', 1, '3', 'Oct 16', 3],
       [4.00, 9.25, 'Limbe', 1, '1', 'Oct 16', 1],
       [10.95, 14.45, 'Makary', 1, '1', 'Oct 16', 1],
-      [3.87, 11.50, 'Bamenda', 1, '1', 'Oct 17', 1]
+      [5.96, 10.15, 'Bamenda', 1, '1', 'Oct 17', 1]  // Corrected position
     ];
 
     const colors = {1: 'green', 2: 'yellow', 3: 'yellow', 4: 'red', 5: 'red'};
-    const baseRadius = 15000; // Base radius in meters (~3-5 pixels at zoom 6)
+    const baseRadius = 15000; // Base radius in meters
 
     // Store circles for dynamic updates
     const circles = [];
@@ -126,7 +127,7 @@
     // Function to update bubble sizes based on zoom
     function updateBubbleSizes() {
       const zoom = map.getZoom();
-      const scaleFactor = 6 / zoom; // Normalize to zoom 6
+      const scaleFactor = 6 / zoom;
       cityData.forEach(function(data, index) {
         const adjustedRadius = baseRadius * scaleFactor;
         if (circles[index]) {
@@ -213,7 +214,7 @@
         return container;
       },
       onRemove: function(map) {
-        // Nothing to do on remove
+        // Nothing to do on removal
       }
     });
 
