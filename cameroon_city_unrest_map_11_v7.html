@@ -30,6 +30,7 @@
       font-size: 12px;
       position: relative;
       z-index: 1000;
+      -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
     }
     .table-control button {
       margin-bottom: 5px;
@@ -55,7 +56,7 @@
       word-wrap: break-word;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap; /* Prevent wrapping for straight columns */
+      white-space: nowrap;
     }
     .table-control th {
       position: sticky;
@@ -63,10 +64,11 @@
     }
     .table-wrapper {
       max-height: 45vh;
-      overflow-x: auto; /* Horizontal scroll for mobile */
+      overflow-x: auto;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
-      min-width: 100%; /* Ensure full width for scrolling */
+      -webkit-overflow-scrolling: touch;
+      min-width: 100%;
+      touch-action: manipulation; /* Enable immediate touch scrolling */
     }
 
     /* Media Queries for Mobile */
@@ -79,21 +81,21 @@
         width: 90vw;
         margin: 0 auto;
       }
-    .table-control table {
-      min-width: 800px; /* Wider min-width for better horizontal scroll */
+      .table-control table {
+        min-width: 800px;
+      }
+      .table-control th, .table-control td {
+        font-size: 8px;
+        padding: 1px 2px;
+      }
+      .leaflet-tooltip {
+        font-size: 10px;
+        max-width: 100px;
+      }
+      .table-control button {
+        font-size: 12px;
+      }
     }
-    .table-control th, .table-control td {
-      font-size: 8px;
-      padding: 1px 2px; /* Tighter padding */
-    }
-    .leaflet-tooltip {
-      font-size: 10px;
-      max-width: 100px;
-    }
-    .table-control button {
-      font-size: 12px;
-    }
-  }
   </style>
 </head>
 <body>
@@ -105,9 +107,9 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    L.control.scale().addTo(map); // Scale for mobile
+    L.control.scale().addTo(map);
 
-    // Updated city data with corrected Bamenda coordinates (5.96, 10.15)
+    // City data with corrected Bamenda coordinates
     const cityData = [
       [9.30, 13.40, 'Garoua', 2, '2, 2', 'Oct 13, Oct 17', 2],
       [4.05, 9.70, 'Douala', 4, '1, 2, 4, 4', 'Oct 14, 15, 16, 17', 4],
@@ -115,16 +117,14 @@
       [5.40, 10.45, 'Dschang', 1, '3', 'Oct 16', 3],
       [4.00, 9.25, 'Limbe', 1, '1', 'Oct 16', 1],
       [10.95, 14.45, 'Makary', 1, '1', 'Oct 16', 1],
-      [5.96, 10.15, 'Bamenda', 1, '1', 'Oct 17', 1]  // Corrected position
+      [5.96, 10.15, 'Bamenda', 1, '1', 'Oct 17', 1]
     ];
 
     const colors = {1: 'green', 2: 'yellow', 3: 'yellow', 4: 'red', 5: 'red'};
-    const baseRadius = 15000; // Base radius in meters
+    const baseRadius = 15000;
 
-    // Store circles for dynamic updates
     const circles = [];
 
-    // Function to update bubble sizes based on zoom
     function updateBubbleSizes() {
       const zoom = map.getZoom();
       const scaleFactor = 6 / zoom;
@@ -136,7 +136,6 @@
       });
     }
 
-    // Add bubbles
     cityData.forEach(function(data, index) {
       const color = colors[data[6]] || 'blue';
       const circle = L.circle([data[0], data[1]], {
@@ -154,13 +153,9 @@
       circles.push(circle);
     });
 
-    // Update radii on zoom
     map.on('zoomend', updateBubbleSizes);
-
-    // Initial update
     updateBubbleSizes();
 
-    // Custom control for the table with frozen header
     L.Control.TableControl = L.Control.extend({
       onAdd: function(map) {
         const container = L.DomUtil.create('div', 'table-control');
@@ -224,7 +219,6 @@
 
     L.control.tableControl({ position: 'bottomright' }).addTo(map);
 
-    // Title control
     L.control({ position: 'topright' }).addTo(map).getContainer().innerHTML = `
       <div style="background: white; padding: 10px; border: 1px solid #333;">
         <h4>Cameroon Unrest by City (11 Events, Oct 13-17, 2025)</h4>
