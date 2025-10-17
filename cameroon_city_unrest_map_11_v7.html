@@ -3,44 +3,29 @@
 <head>
   <title>Cameroon Post-Election Unrest: Bubble Plot by City (11 Events, Oct 13-17, 2025)</title>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    #map {
-      height: 100vh;
-      width: 100%;
-      max-width: 100vw;
-      margin: 0;
-      padding: 0;
-    }
-    .leaflet-tooltip {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #333;
-      padding: 5px;
-      font-size: 12px;
-      max-width: 150px;
-    }
+    #map { height: 600px; width: 100%; }
+    .leaflet-tooltip { background: rgba(255, 255, 255, 0.9); border: 1px solid #333; padding: 5px; font-size: 12px; }
     .table-control {
       background: white;
       padding: 10px;
       border: 1px solid #333;
-      max-height: 50vh;
+      max-height: 200px;
       overflow-y: auto;
       font-size: 12px;
       position: relative;
-      z-index: 1000;
     }
     .table-control button {
       margin-bottom: 5px;
-      padding: 5px 10px;
-      width: 100%;
-      font-size: 14px;
+      padding: 2px 5px;
     }
     .table-control table {
       width: 100%;
       border-collapse: collapse;
-      table-layout: fixed;
+      table-layout: fixed; /* Enforce uniform column widths */
     }
     .table-control thead {
       position: sticky;
@@ -50,50 +35,21 @@
     }
     .table-control th, .table-control td {
       border: 1px solid #ddd;
-      padding: 2px 4px;
+      padding: 2px;
       text-align: left;
-      word-wrap: break-word;
+      word-wrap: break-word; /* Handle long text */
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap; /* Prevent wrapping for straight columns */
     }
     .table-control th {
       position: sticky;
       top: 0;
     }
     .table-wrapper {
-      max-height: 45vh;
-      overflow-x: auto; /* Horizontal scroll for mobile */
+      max-height: 180px; /* Adjust for header and padding */
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
-      min-width: 100%; /* Ensure full width for scrolling */
+      display: block;
     }
-
-    /* Media Queries for Mobile */
-    @media (max-width: 768px) {
-      #map {
-        height: 60vh;
-      }
-      .table-control {
-        max-height: 60vh;
-        width: 90vw;
-        margin: 0 auto;
-      }
-    .table-control table {
-      min-width: 800px; /* Wider min-width for better horizontal scroll */
-    }
-    .table-control th, .table-control td {
-      font-size: 8px;
-      padding: 1px 2px; /* Tighter padding */
-    }
-    .leaflet-tooltip {
-      font-size: 10px;
-      max-width: 100px;
-    }
-    .table-control button {
-      font-size: 12px;
-    }
-  }
   </style>
 </head>
 <body>
@@ -105,9 +61,7 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    L.control.scale().addTo(map); // Scale for mobile
-
-    // Updated city data with corrected Bamenda coordinates (5.96, 10.15)
+    // City data: [lat, lng, city, numEvents, severities, dates, maxSeverity]
     const cityData = [
       [9.30, 13.40, 'Garoua', 2, '2, 2', 'Oct 13, Oct 17', 2],
       [4.05, 9.70, 'Douala', 4, '1, 2, 4, 4', 'Oct 14, 15, 16, 17', 4],
@@ -115,11 +69,11 @@
       [5.40, 10.45, 'Dschang', 1, '3', 'Oct 16', 3],
       [4.00, 9.25, 'Limbe', 1, '1', 'Oct 16', 1],
       [10.95, 14.45, 'Makary', 1, '1', 'Oct 16', 1],
-      [5.96, 10.15, 'Bamenda', 1, '1', 'Oct 17', 1]  // Corrected position
+      [5.96, 10.15, 'Bamenda', 1, '1', 'Oct 17', 1] // Corrected to [5.96, 10.15]
     ];
 
     const colors = {1: 'green', 2: 'yellow', 3: 'yellow', 4: 'red', 5: 'red'};
-    const baseRadius = 15000; // Base radius in meters
+    const baseRadius = 15000; // Base radius in meters (~3-5 pixels at zoom 6)
 
     // Store circles for dynamic updates
     const circles = [];
@@ -127,9 +81,9 @@
     // Function to update bubble sizes based on zoom
     function updateBubbleSizes() {
       const zoom = map.getZoom();
-      const scaleFactor = 6 / zoom;
+      const scaleFactor = 6 / zoom; // Normalize to zoom 6
       cityData.forEach(function(data, index) {
-        const adjustedRadius = baseRadius * scaleFactor;
+        const adjustedRadius = baseRadius * scaleFactor; // Shrink/grow with zoom
         if (circles[index]) {
           circles[index].setRadius(adjustedRadius);
         }
@@ -140,7 +94,7 @@
     cityData.forEach(function(data, index) {
       const color = colors[data[6]] || 'blue';
       const circle = L.circle([data[0], data[1]], {
-        radius: baseRadius,
+        radius: baseRadius, // Initial radius
         color: color,
         fillColor: color,
         fillOpacity: 0.6,
@@ -177,7 +131,7 @@
         headers.forEach(header => {
           const th = L.DomUtil.create('th', '', headerRow);
           th.innerHTML = header;
-          th.style.width = (100 / headers.length) + '%';
+          th.style.width = (100 / headers.length) + '%'; // Distribute width evenly
         });
 
         const tableData = [
@@ -199,7 +153,7 @@
           row.forEach(cell => {
             const td = L.DomUtil.create('td', '', tr);
             td.innerHTML = cell;
-            td.style.width = (100 / headers.length) + '%';
+            td.style.width = (100 / headers.length) + '%'; // Match header widths
           });
         });
 
@@ -214,7 +168,7 @@
         return container;
       },
       onRemove: function(map) {
-        // Nothing to do on removal
+        // Nothing to do on remove
       }
     });
 
